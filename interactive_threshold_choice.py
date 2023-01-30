@@ -4,6 +4,7 @@ import streamlit as st
 from sklearn.datasets import load_breast_cancer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_recall_curve, average_precision_score, confusion_matrix
+from sklearn.metrics import precision_score, recall_score
 
 class PrecisionRecall:
     def __init__(self, model, X, y_true):
@@ -31,20 +32,19 @@ class PrecisionRecall:
         st.write("False Positives:", cm[0, 1])
         st.write("False Negatives:", cm[1, 0])
     
-    def optimize_threshold(self, n_options=4, n_steps=10):
-        threshold = st.slider("Threshold", 0, 1.0, value=0.5)
-        y = self.y_test
+    def optimize_threshold(self, n_options=4, n_steps=1):
+        threshold = 0.5
         
         for step in range(n_steps):
             thresholds = [np.random.uniform(threshold - 0.1, threshold + 0.1) for i in range(n_options)]
             y_preds = [self.show_tradeoff(threshold) for threshold in thresholds]
-            precisions = [precision_score(y, y_pred) for y_pred in y_preds]
-            recalls = [recall_score(y, y_pred) for y_pred in y_preds]
+            precisions = [precision_score(self.y_true, y_pred) for y_pred in y_preds]
+            recalls = [recall_score(self.y_true, y_pred) for y_pred in y_preds]
 
             st.write("Options:")
             for i in range(n_options):
                 st.write("Threshold: {:.2f}, Precision: {:.2f}, Recall: {:.2f}".format(thresholds[i], precisions[i], recalls[i]))
-                st.image(confusion_matrix(y, y_preds[i]), use_column_width=True)
+                st.table(confusion_matrix(self.y_true, y_preds[i]))
 
             # Select the best threshold
             best_index = st.selectbox("Select the best option", options=range(n_options))
@@ -98,3 +98,8 @@ threshold = st.slider("Threshold", 0.0, 1.0, value=float(balance_threshold))
 y_pred = pr.show_tradeoff(threshold)
 pr.show_confusion_matrix(y_pred)
 
+# Part to do interactively
+pr.optimize_threshold()
+
+# todo - add optimization, that is recursive
+# todo - fix model parameters not changing
