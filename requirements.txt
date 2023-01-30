@@ -1,3 +1,4 @@
-tsai==0.3.4
-sktime==0.15.1
-sklearn
+numpy~=1.24.1
+pandas~=1.5.3
+streamlit~=1.17.0
+scikit-learn~=1.2.1
